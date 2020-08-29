@@ -1,19 +1,20 @@
 package slotapp
 
 import (
-	"slotlib/pkg"
+	"slotlib"
 )
 
-var Symbols map[string]*slotlib.Symbol = make(map[string]*slotlib.Symbol)
+var Symbols map[int]*slotlib.Symbol = make(map[int]*slotlib.Symbol)
 
 func init() {
-	Symbols["1"] = Symbol10
-	Symbols["2"] = SymbolJ
-	Symbols["3"] = SymbolQ
-	Symbols["4"] = SymbolK
-	Symbols["5"] = SymbolA
-	Symbols["S"] = SymbolScatter
-	Symbols["W"] = SymbolWild
+	AddSymbol(Symbol10)
+	AddSymbol(Symbol10)
+	AddSymbol(SymbolJ)
+	AddSymbol(SymbolQ)
+	AddSymbol(SymbolK)
+	AddSymbol(SymbolA)
+	AddSymbol(SymbolScatter)
+	AddSymbol(SymbolWild)
 }
 
 var (
@@ -26,3 +27,7 @@ var (
 	SymbolScatter = slotlib.NewSymbol(9, 0x4000, "Satter")
 	SymbolWild    = slotlib.NewSymbol(10, 0x8000, "Wild")
 )
+
+func AddSymbol(symbol *slotlib.Symbol) {
+	Symbols[symbol.Id()] = symbol
+}

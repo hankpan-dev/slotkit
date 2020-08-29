@@ -25,12 +25,18 @@ func (s *Symbol) Create(id int, flag uint32, str string) {
 
 // ID : 圖騰識別
 func (s *Symbol) Id() int {
-	return s.id
+	if nil != s {
+		return s.id
+	}
+	return -1
 }
 
 // Flag : 圖騰類型檢查
 func (s *Symbol) Flag() uint32 {
-	return s.flag
+	if nil != s {
+		return s.flag
+	}
+	return 0
 }
 
 // String : 圖騰文字描述
@@ -44,10 +50,10 @@ func (s *Symbol) String() string {
 // Match : 檢查圖騰是否符合指定的 flag.
 // 成立條件 : (symbol.flag & mask) == symbol.flag
 func (s *Symbol) Match(mask uint32) bool {
-	return s.flag == (s.flag & mask)
+	return nil != s && s.flag == (s.flag&mask)
 }
 
 // Equal : 檢查兩個圖騰是否相等 (id 與 flag 必須完全相同)
 func (s *Symbol) Equal(s2 *Symbol) bool {
-	return (nil != s2 && s.id == s2.id && s.flag == s2.flag)
+	return (nil != s && nil != s2) && (s.id == s2.id && s.flag == s2.flag)
 }
