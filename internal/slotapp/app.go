@@ -1,62 +1,105 @@
 package slotapp
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
 	"slotlib"
+	"time"
 )
 
+var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+
 func Run() {
-
 	slot := slotlib.NewSlot(3, 3, 3, 3, 3) // 3x5
-	slot.Reel(0).SetSymbols(0, SymbolA, SymbolQ, SymbolJ)
-	slot.Reel(1).SetSymbols(0, SymbolA, SymbolK, Symbol10)
-	slot.Reel(2).SetSymbols(0, SymbolWild, SymbolA, SymbolScatter)
-	slot.Reel(3).SetSymbols(0, SymbolQ, SymbolA, SymbolA)
-	slot.Reel(4).SetSymbols(0, SymbolK, SymbolScatter, SymbolK)
-	log.Println(slot)
+	spin(slot)
+	checkPaylines(slot)
+	checkWays(slot)
+}
 
-	// 定義 payline
-	payline := slotlib.NewPayline(0, 3, 6, 9, 12)
-	payline.Update(slot)
+func spin(slot *slotlib.Slot) {
 
-	// 計算 normal symbol 數量
-	var normal uint32 = 0x000FF
-	count := slot.CountMatch(normal)
-	log.Println("slot has normal symbols :", count)
+	for i := 0; i < slot.Reels(); i++ {
+		// 取得亂數, 指向彩帶的位置
+		idx := rnd.Intn(Strips.Length())
 
-	// 尋找第一個 normal symbol
-	// 計算連線數 (包含 wild symbol)
-	dir := false
-	idx, stop := payline.FindMatch(normal, 4, dir)
-	if nil != stop {
-		log.Println("payline - symbol", stop.Symbol, "at index", idx)
-		combins := payline.Combinations(stop.Symbol.Flag()|SymbolWild.Flag(), dir)
-		log.Println("payline - symbol", stop.Symbol, "combinations", combins)
+		reel := slot.Reel(i)
+		for enum := reel.Enum(0, true); nil != enum.Index(); enum.Next() {
+			enum.Index().Symbol = Strips.Cycler(idx).Symbol
+			idx++
+		}
+	}
 
+	log.Println("spin result :", slot)
+}
+
+func checkPaylines(slot *slotlib.Slot) {
+	log.Println("check paylines...")
+	win := 0
+	for i, payline := range Paylines {
+		// 設置 payline 圖騰
+		payline.SetSymbols(slot)
+		_, stop := payline.FindMatch(normal, 0, true)
+
+		combins := 0
+		if nil != stop {
+			combins = payline.Combinations(stop.Symbol.Flag()|SymbolWild.Flag(), true)
+		}
+
+		score := 0
+		if 0 < combins {
+			score = Paytable[stop.Symbol.Id()-1][combins-1]
+		}
+		detail := ""
+		if 0 < score {
+			detail = fmt.Sprintf("has %v '%s' combinations, win %v.", combins, stop.Symbol, score)
+		}
+		log.Println(i, ":", payline, detail)
+		win += score
+	}
+
+	log.Println("payline total win", win)
+
+	sct := slot.CountID(SymbolScatter.Id())
+	if 3 <= sct {
+		log.Println("total", sct, "scatters")
+	}
+}
+
+func checkWays(slot *slotlib.Slot) {
+	log.Println("check ways...")
+
+	// 略過 scatter & wild
+	mask := SymbolScatter.Flag() | SymbolWild.Flag()
+
+	// 列舉第一輪
+	for enum := slot.Reel(0).Enum(0, true); nil != enum.Index(); enum.Next() {
 		// 計算 normal symbol Ways
-		ways := 0
 		base := 1
-		combins = 0
+		ways := 0
+		combins := 0
+
+		// 取得第一輪上的圖騰
+		symbol := enum.Index().Symbol
+		if true == symbol.Match(mask) {
+			continue
+		}
+		mask |= symbol.Flag()
+
 		for i := 0; i < slot.Reels(); i++ {
 			reel := slot.Reel(i)
-			count := reel.CountMatch(stop.Symbol.Flag() | SymbolWild.Flag())
-
+			count := reel.CountMatch(symbol.Flag() | SymbolWild.Flag())
 			if 0 == count {
 				break
 			}
+
 			// 計算 ways 與 combinations
 			ways = base * count
 			base = ways
 			combins++
 		}
-		log.Println("payline - symbol", stop.Symbol, ways, "ways, combinations", combins)
+
+		detial := fmt.Sprintf("'%s' has %v ways, %v combinations", symbol, ways, combins)
+		log.Println(detial)
 	}
-
-	symbol := SymbolWild
-	count = slot.CountEqual(symbol)
-	log.Println("slot has", count, symbol)
-
-	count = slot.CountMatch(normal)
-	log.Println("slot has", count, "normal symbols")
-
 }

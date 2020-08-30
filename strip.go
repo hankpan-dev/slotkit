@@ -43,11 +43,12 @@ func (s *Strip) Index(index int) *Stop {
 }
 
 // Cycler : 以循環方式轉換 index.
-// 當 index = -1 時, 返回最後一個位置的索引值.
-// 當 index = length 時, 返回第一個位置的索引值.
-func (s *Strip) Cycler(index int) int {
+// 當 index = -1 時, 返回最後一個位置的 Stop.
+// 當 index = length 時, 返回第一個位置 Stop.
+func (s *Strip) Cycler(index int) *Stop {
 	length := s.Length()
-	return ((index % length) + length) % length
+	index = ((index % length) + length) % length
+	return s.stops[index]
 }
 
 // Length : 取得彩帶長度
@@ -141,37 +142,33 @@ func (s *Strip) FindUnmatch(mask uint32, start int, dir bool) (int, *Stop) {
 
 func (s *Strip) find(mask uint32, start int, dir bool, match bool) (int, *Stop) {
 
-	enum := s.Enum(start, dir)
-	for nil != enum {
-		stop := s.stops[enum.Index()]
+	for enum := s.Enum(start, dir); nil != enum.Index(); enum.Next() {
+		stop := enum.Index()
 
 		// 檢查錯誤
 		if nil == stop || nil == stop.Symbol {
 			break
 		}
 		if match == stop.Symbol.Match(mask) {
-			return enum.Index(), stop
+			return enum.index, stop
 		}
-		// 列舉下一個
-		enum = enum.Next()
 	}
 
 	return start, nil
 }
 
-func (s *Strip) Enum(index int, dir bool) *enum {
-
-	// 檢查邊界
-	if true == s.Bound(index) {
-		enum := &enum{index: index, length: s.Length(), step: 1}
-		if false == dir {
-			enum.step = -1
-		}
-		return enum
+// ResetParams : 清除 Param
+func (s *Strip) ResetParams() {
+	for _, stop := range s.stops {
+		stop.Params = nil
 	}
+}
 
-	// 索引超出範圍時 傳回 nil
-	return nil
+// Enum : 列舉彩帶上的 Stop
+func (s *Strip) Enum(index int, dir bool) *enum {
+	enum := &enum{}
+	enum.create(s, index, dir)
+	return enum
 }
 
 func (s *Strip) String() string {
@@ -184,20 +181,40 @@ func (s *Strip) String() string {
 }
 
 type enum struct {
-	index  int
-	length int
-	step   int
+	strip *Strip
+	index int
+	step  int
 }
 
-func (e *enum) Index() int {
-	return e.index
+func (e *enum) create(strip *Strip, index int, dir bool) {
+	e.strip = strip
+	e.index = index
+	e.step = 0
+
+	// 檢查邊界
+	if true == strip.Bound(index) {
+		if true == dir {
+			e.step = 1
+		} else {
+			e.step = -1
+		}
+	}
 }
 
-func (e *enum) Next() *enum {
-	next := e.index + e.step
-	if 0 <= next && e.length > next {
-		e.index = next
-		return e
+func (e *enum) Index() *Stop {
+	if 0 != e.step {
+		return e.strip.Index(e.index)
 	}
 	return nil
+}
+
+func (e *enum) Next() bool {
+	next := e.index + e.step
+	length := e.strip.Length()
+	if 0 <= next && length > next {
+		e.index = next
+	} else {
+		e.step = 0
+	}
+	return 0 != e.step
 }

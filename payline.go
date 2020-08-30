@@ -23,8 +23,8 @@ func (p *Payline) Positions() []int {
 	return p.pos
 }
 
-// Update
-func (p *Payline) Update(slot *Slot) {
+// SetSymbols : 設定 Payline 上的圖騰
+func (p *Payline) SetSymbols(slot *Slot) {
 	for i, pos := range p.pos {
 		stop := slot.Index(pos)
 		p.strip.stops[i] = stop
@@ -67,9 +67,8 @@ func (p *Payline) Combinations(mask uint32, dir bool) int {
 		index = p.strip.Length() - 1
 	}
 
-	enum := p.strip.Enum(index, dir)
-	for nil != enum {
-		stop := p.strip.Index(enum.Index())
+	for enum := p.strip.Enum(index, dir); nil != enum.Index(); enum.Next() {
+		stop := enum.Index()
 
 		// 檢查位置是否超出範圍
 		if nil == stop || nil == stop.Symbol {
@@ -80,8 +79,11 @@ func (p *Payline) Combinations(mask uint32, dir bool) int {
 			return count
 		}
 		count++
-		enum = enum.Next()
 	}
 
 	return count
+}
+
+func (p *Payline) String() string {
+	return p.strip.String()
 }
