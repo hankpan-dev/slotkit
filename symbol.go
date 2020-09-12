@@ -1,4 +1,4 @@
-package slots
+package slotkit
 
 // Symbol :
 type Symbol struct {

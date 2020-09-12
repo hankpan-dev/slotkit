@@ -1,4 +1,4 @@
-package slots
+package slotkit
 
 // Slot :
 type Slot struct {
@@ -32,7 +32,6 @@ func (s *Slot) Create(reelsize ...int) {
 
 // Reel : 取得滾輪陣列
 func (s *Slot) Reel(index int) *Strip {
-	
 	return s.reels[index]
 }
 

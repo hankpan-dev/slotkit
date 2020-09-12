@@ -1,4 +1,4 @@
-package slots
+package slotkit
 
 // Stop
 type Stop struct {

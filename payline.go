@@ -1,4 +1,4 @@
-package slots
+package slotkit
 
 type Payline struct {
 	pos   []int

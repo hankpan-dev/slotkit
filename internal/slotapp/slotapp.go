@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"slotlib/slots"
+	"slotkit"
 	"time"
 )
 
 var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func Run() {
-	slot := slots.NewSlot(3, 3, 3, 3, 3) // 3x5
+	slot := slotkit.NewSlot(3, 3, 3, 3, 3) // 3x5
 	spin(slot)
 	checkPaylines(slot)
 	checkWays(slot)
 }
 
-func spin(slot *slots.Slot) {
+func spin(slot *slotkit.Slot) {
 
 	for i := 0; i < slot.Reels(); i++ {
 		// 取得亂數, 指向彩帶的位置
@@ -33,7 +33,7 @@ func spin(slot *slots.Slot) {
 	log.Println("spin result :", slot)
 }
 
-func checkPaylines(slot *slots.Slot) {
+func checkPaylines(slot *slotkit.Slot) {
 	log.Println("check paylines...")
 	win := 0
 	for i, payline := range Paylines {
@@ -66,7 +66,7 @@ func checkPaylines(slot *slots.Slot) {
 	}
 }
 
-func checkWays(slot *slots.Slot) {
+func checkWays(slot *slotkit.Slot) {
 	log.Println("check ways...")
 
 	// 略過 scatter & wild

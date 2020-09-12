@@ -1,10 +1,10 @@
 package slotapp
 
 import (
-	"slotlib/slots"
+	"slotkit"
 )
 
-var Strips *slots.Strip = slots.NewStrip(20)
+var Strips *slotkit.Strip = slotkit.NewStrip(20)
 
 func init() {
 	Strips.SetSymbols(0,

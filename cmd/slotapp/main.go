@@ -1,7 +1,7 @@
 package main
 
 import (
-	"slotlib/internal/slotapp"
+	"slotkit/internal/slotapp"
 )
 
 func main() {

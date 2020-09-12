@@ -1,12 +1,12 @@
 package slotapp
 
 import (
-	"slotlib/slots"
+	"slotkit"
 )
 
 const normal uint32 = 0x00ff
 
-var Symbols map[int]*slots.Symbol = make(map[int]*slots.Symbol)
+var Symbols map[int]*slotkit.Symbol = make(map[int]*slotkit.Symbol)
 
 func init() {
 	addSymbol(SymbolJ)
@@ -22,19 +22,19 @@ func init() {
 }
 
 var (
-	NonSymbol     = slots.NewSymbol(0, 0x0000, "?")
-	SymbolJ       = slots.NewSymbol(2, 0x0001, "J")
-	SymbolQ       = slots.NewSymbol(3, 0x0002, "Q")
-	SymbolK       = slots.NewSymbol(4, 0x0004, "K")
-	SymbolA       = slots.NewSymbol(5, 0x0008, "A")
-	SymbolStone   = slots.NewSymbol(5, 0x0010, "Stone")
-	SymbolGem     = slots.NewSymbol(5, 0x0020, "Gem")
-	SymbolSpell   = slots.NewSymbol(5, 0x0040, "Spell")
-	SymbolRing    = slots.NewSymbol(1, 0x0080, "Ring")
-	SymbolScatter = slots.NewSymbol(9, 0x4000, "Satter")
-	SymbolWild    = slots.NewSymbol(10, 0x8000, "Wild")
+	NonSymbol     = slotkit.NewSymbol(0, 0x0000, "?")
+	SymbolJ       = slotkit.NewSymbol(2, 0x0001, "J")
+	SymbolQ       = slotkit.NewSymbol(3, 0x0002, "Q")
+	SymbolK       = slotkit.NewSymbol(4, 0x0004, "K")
+	SymbolA       = slotkit.NewSymbol(5, 0x0008, "A")
+	SymbolStone   = slotkit.NewSymbol(5, 0x0010, "Stone")
+	SymbolGem     = slotkit.NewSymbol(5, 0x0020, "Gem")
+	SymbolSpell   = slotkit.NewSymbol(5, 0x0040, "Spell")
+	SymbolRing    = slotkit.NewSymbol(1, 0x0080, "Ring")
+	SymbolScatter = slotkit.NewSymbol(9, 0x4000, "Satter")
+	SymbolWild    = slotkit.NewSymbol(10, 0x8000, "Wild")
 )
 
-func addSymbol(symbol *slots.Symbol) {
+func addSymbol(symbol *slotkit.Symbol) {
 	Symbols[symbol.Id()] = symbol
 }
