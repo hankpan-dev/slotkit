@@ -1,4 +1,4 @@
-package slotlib
+package slots
 
 type Payline struct {
 	pos   []int

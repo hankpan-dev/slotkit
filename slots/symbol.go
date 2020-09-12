@@ -1,4 +1,4 @@
-package slotlib
+package slots
 
 // Symbol :
 type Symbol struct {

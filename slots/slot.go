@@ -1,4 +1,4 @@
-package slotlib
+package slots
 
 // Slot :
 type Slot struct {
