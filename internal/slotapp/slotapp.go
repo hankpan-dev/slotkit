@@ -19,13 +19,14 @@ func Run() {
 
 func spin(slot *slotkit.Slot) {
 
-	for i := 0; i < slot.Reels(); i++ {
+	for index := 0; index < slot.Reels(); index++ {
+		reel := slot.Reel(index)
+
 		// 取得亂數, 指向彩帶的位置
 		idx := rnd.Intn(Strips.Length())
 
-		reel := slot.Reel(i)
-		for enum := reel.Enum(0, true); nil != enum.Index(); enum.Next() {
-			enum.Index().Symbol = Strips.Cycler(idx).Symbol
+		for iter := reel.Iterator(0, true); iter.HasNext(); iter.Next() {
+			iter.Current().Symbol = Strips.Cycler(idx).Symbol
 			idx++
 		}
 	}
@@ -73,14 +74,14 @@ func checkWays(slot *slotkit.Slot) {
 	mask := SymbolScatter.Flag() | SymbolWild.Flag()
 
 	// 列舉第一輪
-	for enum := slot.Reel(0).Enum(0, true); nil != enum.Index(); enum.Next() {
+	for iter := slot.Reel(0).Iterator(0, true); iter.HasNext(); iter.Next() {
 		// 計算 normal symbol Ways
 		base := 1
 		ways := 0
 		combins := 0
 
 		// 取得第一輪上的圖騰
-		symbol := enum.Index().Symbol
+		symbol := iter.Current().Symbol
 		if true == symbol.Match(mask) {
 			continue
 		}

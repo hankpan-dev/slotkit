@@ -67,8 +67,8 @@ func (p *Payline) Combinations(mask uint32, dir bool) int {
 		index = p.strip.Length() - 1
 	}
 
-	for enum := p.strip.Enum(index, dir); nil != enum.Index(); enum.Next() {
-		stop := enum.Index()
+	for iter := p.strip.Iterator(index, dir); true == iter.HasNext(); iter.Next() {
+		stop := iter.Current()
 
 		// 檢查位置是否超出範圍
 		if nil == stop || nil == stop.Symbol {

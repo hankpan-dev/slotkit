@@ -142,15 +142,15 @@ func (s *Strip) FindUnmatch(mask uint32, start int, dir bool) (int, *Stop) {
 
 func (s *Strip) find(mask uint32, start int, dir bool, match bool) (int, *Stop) {
 
-	for enum := s.Enum(start, dir); nil != enum.Index(); enum.Next() {
-		stop := enum.Index()
+	for iter := s.Iterator(start, dir); true == iter.HasNext(); iter.Next() {
+		stop := iter.Current()
 
 		// 檢查錯誤
 		if nil == stop || nil == stop.Symbol {
 			break
 		}
 		if match == stop.Symbol.Match(mask) {
-			return enum.index, stop
+			return iter.index, stop
 		}
 	}
 
@@ -164,11 +164,11 @@ func (s *Strip) ResetParams() {
 	}
 }
 
-// Enum : 列舉彩帶上的 Stop
-func (s *Strip) Enum(index int, dir bool) *enum {
-	enum := &enum{}
-	enum.create(s, index, dir)
-	return enum
+// Iterator : 列舉彩帶上的 Stop
+func (s *Strip) Iterator(index int, dir bool) *iterator {
+	iter := &iterator{}
+	iter.create(s, index, dir)
+	return iter
 }
 
 func (s *Strip) String() string {
@@ -180,41 +180,45 @@ func (s *Strip) String() string {
 	return str
 }
 
-type enum struct {
+type iterator struct {
 	strip *Strip
 	index int
 	step  int
 }
 
-func (e *enum) create(strip *Strip, index int, dir bool) {
-	e.strip = strip
-	e.index = index
-	e.step = 0
+func (iter *iterator) create(strip *Strip, index int, dir bool) {
+	iter.strip = strip
+	iter.index = index
+	iter.step = 0
 
 	// 檢查邊界
 	if true == strip.Bound(index) {
 		if true == dir {
-			e.step = 1
+			iter.step = 1
 		} else {
-			e.step = -1
+			iter.step = -1
 		}
 	}
 }
 
-func (e *enum) Index() *Stop {
-	if 0 != e.step {
-		return e.strip.Index(e.index)
+func (iter *iterator) Current() *Stop {
+	if 0 != iter.step {
+		return iter.strip.Index(iter.index)
 	}
 	return nil
 }
 
-func (e *enum) Next() bool {
-	next := e.index + e.step
-	length := e.strip.Length()
+func (iter *iterator) HasNext() bool {
+	return 0 != iter.step
+}
+
+func (iter *iterator) Next() bool {
+	next := iter.index + iter.step
+	length := iter.strip.Length()
 	if 0 <= next && length > next {
-		e.index = next
+		iter.index = next
 	} else {
-		e.step = 0
+		iter.step = 0
 	}
-	return 0 != e.step
+	return 0 != iter.step
 }
