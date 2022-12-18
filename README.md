@@ -3,10 +3,10 @@
 
 ### 範例 : 建立一個 3x5 的滾輪
 ```
-// 創建 slot 物件
+// 創建 slot 物件 (3x5)
 slot := slotkit.NewSlot(3, 3, 3, 3, 3)
 
-// 設定 slot 圖騰
+// 設定 slot 上的圖騰
 slot.SetSymbols(0, SymbolA, SymbolWild, ...)
 
 // 計算 slot 相同 id 的圖騰數量
