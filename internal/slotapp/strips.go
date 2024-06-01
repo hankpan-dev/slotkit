@@ -1,32 +1,9 @@
 package slotapp
 
-import (
-	"slotkit"
-)
-
-var Strips *slotkit.Strip = slotkit.NewStrip(20)
-
-func init() {
-	Strips.SetSymbols(0,
-		SymbolJ,
-		SymbolK,
-		SymbolQ,
-		SymbolWild,
-		SymbolStone,
-		SymbolA,
-		SymbolK,
-		SymbolQ,
-		SymbolRing,
-		SymbolQ,
-		SymbolStone,
-		SymbolGem,
-		SymbolSpell,
-		SymbolGem,
-		SymbolA,
-		SymbolWild,
-		SymbolSpell,
-		SymbolStone,
-		SymbolJ,
-		SymbolScatter,
-	)
+var Strips [][]int = [][]int{
+	{1, 2, 3, 5, 4, 1, 2, 1, 3, 7, 6, 1, 3, 2, 5, 0, 6, 9, 4, 8},
+	{1, 2, 3, 5, 4, 1, 2, 1, 3, 7, 6, 1, 3, 2, 5, 0, 6, 9, 4, 8},
+	{1, 2, 3, 5, 4, 1, 2, 1, 3, 7, 6, 1, 3, 2, 5, 0, 6, 9, 4, 8},
+	{1, 2, 3, 5, 4, 1, 2, 1, 3, 7, 6, 1, 3, 2, 5, 0, 6, 9, 4, 8},
+	{1, 2, 3, 5, 4, 1, 2, 1, 3, 7, 6, 1, 3, 2, 5, 0, 6, 9, 4, 8},
 }

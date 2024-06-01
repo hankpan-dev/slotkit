@@ -11,7 +11,7 @@ import (
 var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 func Run() {
-	slot := slotkit.NewSlot(3, 3, 3, 3, 3) // 3x5
+	slot := slotkit.NewSlot(5, 3) // 5x3
 	spin(slot)
 	checkPaylines(slot)
 	checkWays(slot)
@@ -19,14 +19,15 @@ func Run() {
 
 func spin(slot *slotkit.Slot) {
 
-	for index := 0; index < slot.Reels(); index++ {
-		reel := slot.Reel(index)
+	for i, reel := range slot.Reels() {
+		strip := Strips[i]
 
-		// 取得亂數, 指向彩帶的位置
-		idx := rnd.Intn(Strips.Length())
-
-		for iter := reel.Iterator(0, true); iter.HasNext(); iter.Next() {
-			iter.Current().Symbol = Strips.Cycler(idx).Symbol
+		// 設定滾輪圖騰, 等同於
+		// reel.SetSymbols(0, Symbols.GetRange(strip, idx, len(reel))...)
+		idx := rnd.Intn(len(strip))
+		for _, row := range reel {
+			id := strip[idx%len(strip)]
+			row.Symbol = Symbols[id]
 			idx++
 		}
 	}
@@ -35,36 +36,42 @@ func spin(slot *slotkit.Slot) {
 }
 
 func checkPaylines(slot *slotkit.Slot) {
+
 	log.Println("check paylines...")
+
 	win := 0
 	for i, payline := range Paylines {
-		// 設置 payline 圖騰
-		payline.SetSymbols(slot)
-		_, stop := payline.FindMatch(normal, 0, true)
+		// 取得 payline 對應的圖騰
+		line := payline.FetchSymbols(slot)
 
-		combins := 0
-		if nil != stop {
-			combins = payline.Combinations(stop.Symbol.Flag()|SymbolWild.Flag(), true)
+		var symbol slotkit.Symbol
+		if n := line.FindMatch(normal, 0); n >= 0 {
+			symbol = line[n].Symbol
+		}
+
+		if symbol == nil {
+			continue
 		}
 
 		score := 0
+		combins := line.Combinations(symbol.Flag() | SymbolWild.Flag())
 		if 0 < combins {
-			score = Paytable[stop.Symbol.Id()-1][combins-1]
+			score = Paytable[symbol.Id()-1][combins-1]
 		}
-		detail := ""
+
+		details := ""
 		if 0 < score {
-			detail = fmt.Sprintf("has %v '%s' combinations, win %v.", combins, stop.Symbol, score)
+			details = fmt.Sprintf("'%s' combinations %d, win %d.", symbol, combins, score)
 		}
-		log.Println(i, ":", payline, detail)
+
+		log.Println("payline", i, line, details)
 		win += score
 	}
 
 	log.Println("payline total win", win)
 
-	sct := slot.CountID(SymbolScatter.Id())
-	if 3 <= sct {
-		log.Println("total", sct, "scatters")
-	}
+	sct := slot.Cells().CountID(SymbolScatter.Id())
+	log.Println("total", sct, "scatters")
 }
 
 func checkWays(slot *slotkit.Slot) {
@@ -74,23 +81,22 @@ func checkWays(slot *slotkit.Slot) {
 	mask := SymbolScatter.Flag() | SymbolWild.Flag()
 
 	// 列舉第一輪
-	for iter := slot.Reel(0).Iterator(0, true); iter.HasNext(); iter.Next() {
+	for _, pos := range slot.Reel(0) {
 		// 計算 normal symbol Ways
 		base := 1
 		ways := 0
 		combins := 0
 
-		// 取得第一輪上的圖騰
-		symbol := iter.Current().Symbol
-		if true == symbol.Match(mask) {
+		// 取得第一輪的圖騰
+		symbol := pos.Symbol
+		if symbol.Match(mask) {
 			continue
 		}
 		mask |= symbol.Flag()
 
-		for i := 0; i < slot.Reels(); i++ {
-			reel := slot.Reel(i)
+		for _, reel := range slot.Reels() {
 			count := reel.CountMatch(symbol.Flag() | SymbolWild.Flag())
-			if 0 == count {
+			if count == 0 {
 				break
 			}
 

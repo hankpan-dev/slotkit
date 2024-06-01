@@ -2,45 +2,60 @@ package slotkit
 
 // Slot :
 type Slot struct {
-	Strip
-	reels []*Strip
+	cells Cells
+	reels []Cells
 }
 
-// NewSlot : 建立 slot
-func NewSlot(reelsize ...int) *Slot {
-	s := &Slot{}
-	s.Create(reelsize...)
-	return s
+// NewSlot : 建立相同滾輪長度的 slot
+func NewSlot(reels int, rows int) *Slot {
+	layout := make([]int, reels)
+	for i := 0; i < reels; i++ {
+		layout[i] = rows
+	}
+	return NewSlotFlex(layout)
 }
 
-// Create :
-func (s *Slot) Create(reelsize ...int) {
+// NewSlotFlex : 建立滾輪長度不同的 slot
+func NewSlotFlex(rows []int) *Slot {
+
 	length := 0
-	for _, size := range reelsize {
+	for _, size := range rows {
 		length += size
 	}
 
-	s.Strip.Create(length)
-	s.reels = make([]*Strip, len(reelsize))
+	s := &Slot{}
+	s.cells = NewCells(length)
+	s.reels = make([]Cells, len(rows))
 	index := 0
 	for i := range s.reels {
-		length = reelsize[i]
-		s.reels[i] = s.Slice(index, length)
+		length = rows[i]
+		s.reels[i] = s.cells[index : index+length] // s.Slice(index, length)
 		index += length
 	}
+	return s
 }
 
-// Reel : 取得滾輪陣列
-func (s *Slot) Reel(index int) *Strip {
+// Reel : 取得指定滾輪
+func (s Slot) Reel(index int) Cells {
 	return s.reels[index]
 }
 
-// Reels : 取得滾輪數量
-func (s *Slot) Reels() int {
+// Reels : 取得所有滾輪
+func (s Slot) Reels() []Cells {
+	return s.reels
+}
+
+// TotalReels : 取得滾輪數量
+func (s Slot) TotalReels() int {
 	return len(s.reels)
 }
 
-func (s *Slot) String() string {
+// Cells : 取得所有盤面內容
+func (s Slot) Cells() Cells {
+	return s.cells
+}
+
+func (s Slot) String() string {
 	var str string = "["
 	for _, reel := range s.reels {
 		str += " " + reel.String()
