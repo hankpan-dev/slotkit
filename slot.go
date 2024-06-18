@@ -29,7 +29,7 @@ func NewSlotFlex(rows []int) *Slot {
 	index := 0
 	for i := range s.reels {
 		length = rows[i]
-		s.reels[i] = s.cells[index : index+length] // s.Slice(index, length)
+		s.reels[i] = s.cells[index : index+length : index+length] // s.Slice(index, length)
 		index += length
 	}
 	return s
